@@ -1,0 +1,9 @@
+flask
+flask-cors
+flask-sqlalchemy
+psycopg2-binary
+python-dotenv
+scikit-learn
+pandas
+numpy
+joblib
