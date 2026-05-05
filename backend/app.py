@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 from config import Config
+from flasgger import Swagger
+from flask_mail import Mail
 from database import db, init_db
 from routes.auth_routes import auth_bp
 from routes.prediction_routes import prediction_bp
@@ -8,6 +10,9 @@ from routes.records_routes import records_bp
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+mail = Mail(app)                      
+Swagger(app) 
 
 CORS(app, supports_credentials=True, resources={
     r"/api/*": {
