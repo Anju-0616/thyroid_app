@@ -1,10 +1,17 @@
-// Navbar.jsx
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import NotificationBell from './NotificationBell'
 
-function Navbar({ onAuthChange }) {
+const NAV_ITEMS = [
+  { path: '/dashboard', label: 'Dashboard'    },
+  { path: '/analyze', label: 'Analyze'      },
+  { path: '/history', label: 'History'      },
+  { path: '/doctors', label: 'Doctors'      },
+  { path: '/settings', label: 'Settings'     },
+]
+
+export default function Sidebar({ onAuthChange }) {
+  const location = useLocation()
   const navigate = useNavigate()
-  const token = localStorage.getItem('token')
   const user = JSON.parse(localStorage.getItem('user') || '{}')
 
   const handleLogout = () => {
@@ -15,39 +22,47 @@ function Navbar({ onAuthChange }) {
   }
 
   return (
-    <nav className='bg-blue-600 text-white px-6 py-4 flex justify-between items-center shadow-md'>
-      <Link to='/' className='text-xl font-bold tracking-wide'>
-        🦋 ThyroidCare
-      </Link>
-      <div className='flex items-center gap-6'>
-        {token ? (
-          <>
-            <span className='text-sm'>Hello, {user.name} 👋</span>
-            <Link to='/dashboard' className='hover:underline text-sm'>Dashboard</Link>
-            <Link to='/history' className='hover:underline text-sm'>History</Link>
-            <Link to='/analyze' className='hover:underline text-sm'>Analyze</Link>
-            <Link to='/doctors' className='hover:underline text-sm'>Doctors</Link>
-            <Link to='/settings' className='hover:underline text-sm'>Settings</Link>
-            <NotificationBell />
-            <button
-              onClick={handleLogout}
-              className='bg-white text-blue-600 px-4 py-1 rounded-full text-sm font-medium hover:bg-blue-50'
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to='/login' className='hover:underline text-sm'>Login</Link>
-            <Link to='/register'
-              className='bg-white text-blue-600 px-4 py-1 rounded-full text-sm font-medium hover:bg-blue-50'>
-              Register
-            </Link>
-          </>
-        )}
+    <aside className='fixed top-0 left-0 h-screen w-56 bg-violet-700 flex flex-col z-40'>
+
+      {/* Logo */}
+      <div className='px-6 py-6 border-b border-violet-600'>
+        <Link to='/dashboard' className='flex items-center gap-2'>
+          <span className='text-2xl'>🫂</span>
+          <span className='text-white font-bold text-lg tracking-wide'>ThyroidCare</span>
+        </Link>
       </div>
-    </nav>
+
+      {/* Nav links */}
+      <nav className='flex-1 px-3 py-6 space-y-1 overflow-y-auto'>
+        {NAV_ITEMS.map(({ path, icon, label }) => {
+          const active = location.pathname === path
+          return (
+            <Link
+              key={path}
+              to={path}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all
+                ${active
+                  ? 'bg-white text-violet-700 shadow-sm'
+                  : 'text-violet-100 hover:bg-violet-600'
+                }`}
+            >
+              <span className='text-base'>{icon}</span>
+              {label}
+            </Link>
+          )
+        })}
+      </nav>
+
+      {/* Logout at bottom */}
+      <div className='px-3 py-4 border-t border-violet-600'>
+        <button
+          onClick={handleLogout}
+          className='flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm
+                     font-medium text-violet-200 hover:bg-violet-600 transition-all'
+        >
+          <span>🚪</span> Logout
+        </button>
+      </div>
+    </aside>
   )
 }
-
-export default Navbar

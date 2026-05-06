@@ -1,63 +1,44 @@
-// History.jsx
 import { useState, useEffect } from 'react'
+import Layout from '../components/Layout'
 import RecordTable from '../components/RecordTable'
 import { getRecords } from '../services/api'
 
-function History() {
+export default function History({ onAuthChange }) {
   const [records, setRecords] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const data = await getRecords()
-        setRecords(data)
-      } catch (err) {
-        setError(err.message || 'Failed to load records')
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchRecords()
+    getRecords()
+      .then(setRecords)
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
   }, [])
 
   return (
-    <div className='min-h-screen bg-blue-50 py-10 px-4'>
-      <div className='max-w-4xl mx-auto'>
-        <h1 className='text-3xl font-bold text-blue-600 mb-2'>My History 📋</h1>
-        <p className='text-gray-500 mb-8 text-sm'>
-          All your past thyroid test results in one place.
-        </p>
-
-        {loading && (
-          <div className='text-center text-gray-400 py-10'>
-            Loading your records...
-          </div>
-        )}
-
-        {error && (
-          <div className='bg-red-50 text-red-500 px-4 py-3 rounded-lg text-sm'>
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && records.length === 0 && (
-          <div className='bg-white rounded-2xl shadow-md p-10 text-center'>
-            <p className='text-gray-400 text-lg'>No records found 🦋</p>
-            <p className='text-gray-400 text-sm mt-2'>
-              Go to Dashboard and analyze your thyroid levels to see results here.
-            </p>
-          </div>
-        )}
-
-        {!loading && records.length > 0 && (
-          <RecordTable records={records} />
-        )}
+    <Layout title='History' onAuthChange={onAuthChange}>
+      <div className='mb-6'>
+        <h2 className='text-2xl font-bold text-gray-800'>Test History 📋</h2>
+        <p className='text-gray-400 text-sm mt-1'>All your past thyroid test results.</p>
       </div>
-    </div>
+
+      {loading && <div className='text-center text-gray-400 py-16'>Loading records...</div>}
+
+      {error && (
+        <div className='bg-red-50 text-red-500 px-4 py-3 rounded-xl text-sm'>{error}</div>
+      )}
+
+      {!loading && !error && records.length === 0 && (
+        <div className='bg-white rounded-2xl border border-gray-100 p-16 text-center shadow-sm'>
+          <p className='text-5xl mb-4'>🦋</p>
+          <p className='text-gray-600 font-medium text-lg'>No records yet</p>
+          <p className='text-gray-400 text-sm mt-2'>
+            Go to Analyze to run your first thyroid test.
+          </p>
+        </div>
+      )}
+
+      {!loading && records.length > 0 && <RecordTable records={records} />}
+    </Layout>
   )
 }
-
-export default History

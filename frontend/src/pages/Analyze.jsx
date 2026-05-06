@@ -1,10 +1,10 @@
-// Analyze.jsx
 import { useState } from 'react'
+import Layout from '../components/Layout'
 import InputForm from '../components/InputForm'
 import ResultCard from '../components/ResultCard'
 import { predictThyroid, saveRecord } from '../services/api'
 
-function Analyze() {
+export default function Analyze({ onAuthChange }) {
   const [result, setResult] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -15,48 +15,45 @@ function Analyze() {
     setError('')
     setResult(null)
     setSaved(false)
-
     try {
       const data = await predictThyroid(tsh, t3, tt4)
       setResult(data)
       await saveRecord(tsh, t3, tt4, data.result)
       setSaved(true)
     } catch (err) {
-      setError(err.message || 'Something went wrong. Please try again.')
+      setError(err.message || 'Something went wrong.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className='min-h-screen bg-blue-50 py-10 px-4'>
-      <div className='max-w-2xl mx-auto'>
-        <h1 className='text-3xl font-bold text-blue-600 mb-2'>Analyze Thyroid 🦋</h1>
-        <p className='text-gray-500 mb-8 text-sm'>
-          Enter your thyroid hormone levels below to get an instant analysis.
-        </p>
+    <Layout title='Analyze' onAuthChange={onAuthChange}>
+      <div className='max-w-2xl'>
+        <div className='mb-6'>
+          <h2 className='text-2xl font-bold text-gray-800'>Thyroid Analysis 🔬</h2>
+          <p className='text-gray-400 text-sm mt-1'>
+            Enter your hormone levels to get an instant ML-powered prediction.
+          </p>
+        </div>
 
         <InputForm onSubmit={handlePredict} loading={loading} />
 
         {error && (
-          <div className='bg-red-50 text-red-500 px-4 py-3 rounded-lg mt-6 text-sm'>
-            {error}
-          </div>
+          <div className='bg-red-50 text-red-500 px-4 py-3 rounded-xl mt-4 text-sm'>{error}</div>
         )}
 
         {result && (
           <div className='mt-6'>
             <ResultCard result={result} />
             {saved && (
-              <p className='text-green-500 text-sm mt-2 text-center'>
+              <p className='text-green-500 text-sm mt-3 text-center'>
                 ✅ Result saved to your history!
               </p>
             )}
           </div>
         )}
       </div>
-    </div>
+    </Layout>
   )
 }
-
-export default Analyze
