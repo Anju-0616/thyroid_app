@@ -1,3 +1,4 @@
+// auth.js
 const BASE_URL = 'http://127.0.0.1:5000/api/auth'
 
 export const registerUser = async (name, email, password) => {
@@ -13,7 +14,7 @@ export const registerUser = async (name, email, password) => {
     throw new Error(data.message || 'Registration failed')
   }
 
-  return data
+  return data  // { message, email, dev_otp }
 }
 
 export const loginUser = async (email, password) => {
@@ -25,9 +26,5 @@ export const loginUser = async (email, password) => {
 
   const data = await response.json()
 
-  if (!response.ok) {
-    throw new Error(data.message || 'Login failed')
-  }
-
-  return data
+  return { ok: response.ok, status: response.status, data }
 }

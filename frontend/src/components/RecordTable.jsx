@@ -1,3 +1,4 @@
+// recordtable.jsx
 function RecordTable({ records }) {
   const getBadgeStyle = (result) => {
     switch (result) {

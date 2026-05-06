@@ -1,3 +1,4 @@
+// Register.jsx
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { registerUser } from '../services/auth'
@@ -18,8 +19,10 @@ function Register() {
     setError('')
 
     try {
-      await registerUser(formData.name, formData.email, formData.password)
-      navigate('/login')
+      const data = await registerUser(formData.name, formData.email, formData.password)
+      navigate('/verify-email', {
+        state: { email: data.email, devOtp: data.dev_otp || null }
+      })
     } catch (err) {
       setError(err.message || 'Registration failed. Please try again.')
     } finally {
@@ -34,9 +37,7 @@ function Register() {
         <p className='text-gray-500 text-sm text-center mb-6'>Join ThyroidCare and monitor your health</p>
 
         {error && (
-          <div className='bg-red-50 text-red-500 px-4 py-2 rounded-lg mb-4 text-sm'>
-            {error}
-          </div>
+          <div className='bg-red-50 text-red-500 px-4 py-2 rounded-lg mb-4 text-sm'>{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className='space-y-4'>
@@ -90,9 +91,7 @@ function Register() {
 
         <p className='text-sm text-center text-gray-500 mt-4'>
           Already have an account?{' '}
-          <Link to='/login' className='text-blue-600 font-medium hover:underline'>
-            Login here
-          </Link>
+          <Link to='/login' className='text-blue-600 font-medium hover:underline'>Login here</Link>
         </p>
       </div>
     </div>

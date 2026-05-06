@@ -1,5 +1,5 @@
+#auth_routes.py
 from flask import Blueprint, request, jsonify, current_app
-from flask_mail import Mail, Message
 from database import db
 from models_database.user import User
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -8,19 +8,14 @@ from datetime import datetime, timedelta
 
 auth_bp = Blueprint('auth', __name__)
 
-IS_DEV = os.getenv('FLASK_ENV', 'development') == 'development'
-
-
-def get_mail():
-    return Mail(current_app._get_current_object())
-
 
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
 
 
 def send_otp_email(email, otp, name):
-    mail = get_mail()
+    mail = current_app.extensions['mail']
+    from flask_mail import Message
     msg = Message(
         subject='ThyroidCare — Verify your email',
         recipients=[email],
@@ -55,7 +50,7 @@ def register():
               example: password123
     responses:
       201:
-        description: Registered. dev_otp field visible in development mode.
+        description: Registered. dev_otp returned in response.
       409:
         description: Email already registered.
     """
@@ -89,14 +84,11 @@ def register():
     except Exception as e:
         print(f'Email error (non-fatal): {e}')
 
-    response = {
+    return jsonify({
         'message': 'Registered successfully. Check your email for the OTP.',
-        'email': email
-    }
-    if IS_DEV:
-        response['dev_otp'] = otp
-
-    return jsonify(response), 201
+        'email': email,
+        'dev_otp': otp
+    }), 201
 
 
 @auth_bp.route('/verify-otp', methods=['POST'])
@@ -184,7 +176,7 @@ def resend_otp():
               example: anjali@example.com
     responses:
       200:
-        description: OTP resent. dev_otp visible in development mode.
+        description: OTP resent. dev_otp returned in response.
     """
     data = request.get_json()
     email = data.get('email', '').strip().lower()
@@ -206,11 +198,10 @@ def resend_otp():
     except Exception as e:
         print(f'Resend error (non-fatal): {e}')
 
-    response = {'message': 'OTP resent successfully.'}
-    if IS_DEV:
-        response['dev_otp'] = otp
-
-    return jsonify(response), 200
+    return jsonify({
+        'message': 'OTP resent successfully.',
+        'dev_otp': otp
+    }), 200
 
 
 @auth_bp.route('/login', methods=['POST'])

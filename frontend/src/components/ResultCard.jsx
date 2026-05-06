@@ -1,3 +1,4 @@
+// ResultCard.jsx
 function ResultCard({ result }) {
   const getStyle = () => {
     switch (result.result) {

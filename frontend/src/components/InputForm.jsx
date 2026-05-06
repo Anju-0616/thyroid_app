@@ -1,3 +1,4 @@
+// InputForm.jsx
 import { useState } from 'react'
 
 function InputForm({ onSubmit, loading }) {

@@ -1,3 +1,4 @@
+// History.jsx
 import { useState, useEffect } from 'react'
 import RecordTable from '../components/RecordTable'
 import { getRecords } from '../services/api'

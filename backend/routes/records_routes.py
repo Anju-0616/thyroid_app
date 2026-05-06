@@ -1,21 +1,25 @@
+# routes/records_routes.py
 from flask import Blueprint, request, jsonify
 from database import db
 from models_database.thyroid_record import ThyroidRecord
-import jwt
-import os
+from routes.notification_routes import create_notification
+import jwt, os
 
 records_bp = Blueprint('records', __name__)
+
 
 def get_user_id_from_token(request):
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     if not token:
         return None
     try:
-        decoded = jwt.decode(token, os.getenv('JWT_SECRET_KEY') or 'thyroid_app_secret_key', algorithms=['HS256'])
+        decoded = jwt.decode(
+            token,
+            os.getenv('JWT_SECRET_KEY', 'thyroid_app_secret_key'),
+            algorithms=['HS256']
+        )
         return decoded.get('user_id')
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
 
 
@@ -44,6 +48,15 @@ def save_record():
     db.session.add(record)
     db.session.commit()
 
+    # ── Notification ──────────────────────────────────────
+    emoji = '✅' if result == 'normal' else '⚠️'
+    create_notification(
+        user_id=user_id,
+        title=f'{emoji} New Analysis Result',
+        message=f'Your thyroid analysis is complete. Result: {result.capitalize()}. TSH: {tsh}, T3: {t3}, TT4: {tt4}.',
+        notif_type='analysis'
+    )
+
     return jsonify({'message': 'Record saved successfully'}), 201
 
 
@@ -53,7 +66,10 @@ def get_records():
     if not user_id:
         return jsonify({'message': 'Unauthorized'}), 401
 
-    records = ThyroidRecord.query.filter_by(user_id=user_id).order_by(ThyroidRecord.created_at.desc()).all()
+    records = ThyroidRecord.query\
+        .filter_by(user_id=user_id)\
+        .order_by(ThyroidRecord.created_at.desc())\
+        .all()
 
     result = []
     for r in records:
