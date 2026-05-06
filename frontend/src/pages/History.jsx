@@ -1,3 +1,4 @@
+// History.jsx
 import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import RecordTable from '../components/RecordTable'

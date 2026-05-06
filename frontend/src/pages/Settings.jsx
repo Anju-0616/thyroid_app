@@ -1,3 +1,4 @@
+// Settings.jsx
 import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import { getReminderPreference, saveReminderPreference, downloadReport } from '../services/api'
