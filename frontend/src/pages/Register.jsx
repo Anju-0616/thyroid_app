@@ -46,7 +46,7 @@ export default function Register() {
 
           <form onSubmit={handleSubmit} className='space-y-4'>
             {[
-              { label: 'Full Name',  name: 'name',     type: 'text',     placeholder: 'Anjali K'           },
+              { label: 'Full Name',  name: 'name',     type: 'text',     placeholder: 'your name'           },
               { label: 'Email',      name: 'email',    type: 'email',    placeholder: 'you@example.com'    },
               { label: 'Password',   name: 'password', type: 'password', placeholder: '••••••••'           },
             ].map(({ label, name, type, placeholder }) => (
