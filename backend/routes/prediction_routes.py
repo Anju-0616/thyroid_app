@@ -1,85 +1,91 @@
 # prediction_routes.py
 from flask import Blueprint, request, jsonify
-import joblib
-import numpy as np
-import os
 
 prediction_bp = Blueprint('prediction', __name__)
 
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '..', 'model_ML', 'thyroid_model.pkl')
 
+def classify_thyroid(tsh, t3, tt4):
+    """
+    Rule-based classifier using standard clinical thresholds:
+    TSH  normal: 0.5 – 4.5 mIU/L
+    T3   normal: 80  – 200 ng/dL
+    TT4  normal: 5.0 – 12.0 µg/dL
+    """
+    tsh_low  = tsh < 0.5
+    tsh_high = tsh > 4.5
+    t3_low   = t3  < 80
+    t3_high  = t3  > 200
+    tt4_low  = tt4 < 5.0
+    tt4_high = tt4 > 12.0
 
-def load_model():
-    if os.path.exists(MODEL_PATH):
-        return joblib.load(MODEL_PATH)
-    return None
+    # Hyperthyroid: suppressed TSH + elevated T3 or TT4
+    if tsh_low and (t3_high or tt4_high):
+        return 'hyperthyroid'
 
+    # Hypothyroid: elevated TSH + low T3 or TT4
+    if tsh_high and (t3_low or tt4_low):
+        return 'hypothyroid'
 
-def rule_based_prediction(tsh, t3, tt4):
-    # Proper thyroid classification logic
-    if tsh > 4.5:
-        if t3 < 80 or tt4 < 5.0:
-            return 'hypothyroid'
-        else:
-            return 'subclinical hypothyroid'
+    # Subclinical — TSH out of range but T3/TT4 still normal
+    if tsh_high:
+        return 'subclinical hypothyroid'
+    if tsh_low:
+        return 'subclinical hyperthyroid'
 
-    elif tsh < 0.4:
-        if t3 > 200 or tt4 > 12.0:
-            return 'hyperthyroid'
-        else:
-            return 'subclinical hyperthyroid'
-
-    else:
-        return 'normal'
+    return 'normal'
 
 
 @prediction_bp.route('/predict', methods=['POST'])
 def predict():
+    """
+    Predict thyroid condition
+    ---
+    tags:
+      - Prediction
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          type: object
+          required: [tsh, t3, tt4]
+          properties:
+            tsh:
+              type: number
+              example: 0.05
+            t3:
+              type: number
+              example: 250
+            tt4:
+              type: number
+              example: 15.0
+    responses:
+      200:
+        description: Returns result as normal / hypothyroid / hyperthyroid / subclinical
+    """
     data = request.get_json()
 
+    if not data:
+        return jsonify({'message': 'No data provided'}), 400
+
     tsh = data.get('tsh')
-    t3 = data.get('t3')
+    t3  = data.get('t3')
     tt4 = data.get('tt4')
 
-    # Validate input
     if tsh is None or t3 is None or tt4 is None:
         return jsonify({'message': 'TSH, T3 and TT4 values are required'}), 400
 
     try:
         tsh = float(tsh)
-        t3 = float(t3)
+        t3  = float(t3)
         tt4 = float(tt4)
     except ValueError:
         return jsonify({'message': 'Invalid values, please enter numbers only'}), 400
 
-    model = load_model()
+    if tsh <= 0 or t3 <= 0 or tt4 <= 0:
+        return jsonify({'message': 'All values must be greater than 0'}), 400
 
-    # Default to rule-based prediction
-    result = rule_based_prediction(tsh, t3, tt4)
-
-    # Try ML model (but validate output)
-    if model:
-        try:
-            input_data = np.array([[tsh, t3, tt4]])
-            prediction = model.predict(input_data)[0]
-
-            print("Model Prediction:", prediction)  # debug
-
-            # Accept only valid outputs
-            valid_outputs = [
-                'normal',
-                'hypothyroid',
-                'hyperthyroid',
-                'subclinical hypothyroid',
-                'subclinical hyperthyroid'
-            ]
-
-            if str(prediction).lower() in valid_outputs:
-                result = str(prediction).lower()
-
-        except Exception as e:
-            print("Model error:", e)
-            # fallback already handled
+    result = classify_thyroid(tsh, t3, tt4)
 
     return jsonify({
         'result': result,
