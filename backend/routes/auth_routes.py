@@ -150,9 +150,9 @@ def verify_otp():
     )
 
     return jsonify({
-        'message': 'Email verified successfully!',
-        'token': token,
-        'user': {'id': user.id, 'name': user.name, 'email': user.email}
+    'message': 'Email verified successfully!',
+    'token': token,
+    'user': {'id': user.id, 'name': user.name, 'email': user.email, 'is_admin': user.is_admin}
     }), 200
 
 
@@ -258,6 +258,6 @@ def login():
     )
 
     return jsonify({
-        'token': token,
-        'user': {'id': user.id, 'name': user.name, 'email': user.email}
+    'token': token,
+    'user': {'id': user.id, 'name': user.name, 'email': user.email, 'is_admin': user.is_admin}
     }), 200

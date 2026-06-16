@@ -13,6 +13,7 @@ from routes.appointment_routes import appointment_bp
 from routes.reminder_routes import reminder_bp
 from routes.report_routes import report_bp
 from routes.notification_routes import notification_bp
+from routes.admin_routes import admin_bp
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 
@@ -44,6 +45,7 @@ app.register_blueprint(appointment_bp,   url_prefix='/api')
 app.register_blueprint(reminder_bp,      url_prefix='/api')
 app.register_blueprint(report_bp,        url_prefix='/api')
 app.register_blueprint(notification_bp,  url_prefix='/api')
+app.register_blueprint(admin_bp,         url_prefix='/api')
 
 from reminder_services import run_reminders
 

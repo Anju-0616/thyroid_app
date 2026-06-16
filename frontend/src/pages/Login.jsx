@@ -23,7 +23,7 @@ export default function Login({ onLogin }) {
       localStorage.setItem('token', data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       onLogin(data.token)
-      navigate('/dashboard')
+      navigate(data.user.is_admin ? '/admin/dashboard' : '/dashboard')
     } catch (err) {
       setError(err.message)
     } finally {
