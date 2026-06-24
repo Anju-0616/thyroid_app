@@ -12,6 +12,7 @@ Flask-SQLAlchemy==3.1.1
 fonttools==4.62.1
 fpdf2==2.8.7
 greenlet==3.5.0
+gunicorn==26.0.0
 itsdangerous==2.2.0
 Jinja2==3.1.6
 joblib==1.5.3
