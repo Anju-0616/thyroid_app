@@ -28,7 +28,7 @@ CORS(app, supports_credentials=True, resources={
         "origins": [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
-            "http://localhost:5174",
+            "https://"
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"]
@@ -64,4 +64,4 @@ def home():
     return {'message': 'Thyroid Detection API is running!'}
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=False, use_reloader=False)
